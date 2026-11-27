@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="com.example.coffee.InternalDiagnosticsTest" tests="3" failures="0" errors="0" skipped="0" time="0.461">
+  <testcase name="missingCategoryAndMissingInventoryHaveDifferentInternalCodes" classname="com.example.coffee.InternalDiagnosticsTest" time="0.013" />
+  <testcase name="controlledFaultLogsCodeIdsAndStackButKeepsThePublic500Contract" classname="com.example.coffee.InternalDiagnosticsTest" time="0.059" />
+  <testcase name="driverMessagesAndCausesNeverReachDiagnosticLogsOrResponse" classname="com.example.coffee.InternalDiagnosticsTest" time="0.005" />
+</testsuite>

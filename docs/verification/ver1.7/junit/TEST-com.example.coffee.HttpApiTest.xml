@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="com.example.coffee.HttpApiTest" tests="40" failures="0" errors="0" skipped="0" time="10.403">
+  <testcase name="existingPriceAndReceiptDoNotChangeWhenCatalogueChanges" classname="com.example.coffee.HttpApiTest" time="0.125" />
+  <testcase name="paymentDeclineReplayAndLaterApprovalHaveExplicitSemantics" classname="com.example.coffee.HttpApiTest" time="0.142" />
+  <testcase name="unicodeNamesAndUtcTimestampsSurviveMySqlRoundTrip" classname="com.example.coffee.HttpApiTest" time="0.033" />
+  <testcase name="failureAfterDeductionRollsBackOrderStockReceiptAndKeyTogether" classname="com.example.coffee.HttpApiTest" time="0.169" />
+  <testcase name="caseDistinctKeysDoNotCollideInMySql" classname="com.example.coffee.HttpApiTest" time="0.057" />
+  <testcase name="concurrentPaymentsWithDifferentKeysStillDeductExactlyOnce" classname="com.example.coffee.HttpApiTest" time="0.115" />
+  <testcase name="schemaUsesInnoDbAndRejectsNegativeInventoryInStrictMode" classname="com.example.coffee.HttpApiTest" time="0.019" />
+  <testcase name="caughtMandatoryFailureStillRollsBackTheOuterTransaction" classname="com.example.coffee.HttpApiTest" time="0.024" />
+  <testcase name="writeServicesRejectMissingOrReadOnlyTransaction" classname="com.example.coffee.HttpApiTest" time="0.011" />
+  <testcase name="oppositeInputItemOrdersDoNotDeadlock" classname="com.example.coffee.HttpApiTest" time="0.073" />
+  <testcase name="invalidInputDoesNotPersist(String)[1]" classname="com.example.coffee.HttpApiTest" time="0.04" />
+  <testcase name="invalidInputDoesNotPersist(String)[2]" classname="com.example.coffee.HttpApiTest" time="0.013" />
+  <testcase name="invalidInputDoesNotPersist(String)[3]" classname="com.example.coffee.HttpApiTest" time="0.013" />
+  <testcase name="invalidInputDoesNotPersist(String)[4]" classname="com.example.coffee.HttpApiTest" time="0.02" />
+  <testcase name="invalidInputDoesNotPersist(String)[5]" classname="com.example.coffee.HttpApiTest" time="0.014" />
+  <testcase name="invalidInputDoesNotPersist(String)[6]" classname="com.example.coffee.HttpApiTest" time="0.018" />
+  <testcase name="invalidInputDoesNotPersist(String)[7]" classname="com.example.coffee.HttpApiTest" time="0.029" />
+  <testcase name="invalidInputDoesNotPersist(String)[8]" classname="com.example.coffee.HttpApiTest" time="0.016" />
+  <testcase name="invalidInputDoesNotPersist(String)[9]" classname="com.example.coffee.HttpApiTest" time="0.013" />
+  <testcase name="invalidInputDoesNotPersist(String)[10]" classname="com.example.coffee.HttpApiTest" time="0.02" />
+  <testcase name="invalidIdentifiersUnknownRoutesAndPaymentIntentHaveStableErrors" classname="com.example.coffee.HttpApiTest" time="0.065" />
+  <testcase name="stockCheckOnCreationIsAdvisoryAndDoesNotReserve" classname="com.example.coffee.HttpApiTest" time="0.044" />
+  <testcase name="boundedLockWaitReturnsRetryableErrorAndLeavesNoPartialWrites" classname="com.example.coffee.HttpApiTest" time="6.056" />
+  <testcase name="ownerAuthenticationOrderingAndStatusFilter" classname="com.example.coffee.HttpApiTest" time="1.328" />
+  <testcase name="idempotencyHeaderRequiredAndBounded" classname="com.example.coffee.HttpApiTest" time="0.171" />
+  <testcase name="createReplayIsOriginalEvenAfterPaymentAndCanonicalizesOrder" classname="com.example.coffee.HttpApiTest" time="0.056" />
+  <testcase name="concurrentSameKeyCreateProducesOneOrderAndIdenticalResponses" classname="com.example.coffee.HttpApiTest" time="0.046" />
+  <testcase name="lastItemRaceAllowsExactlyOnePaidOrder" classname="com.example.coffee.HttpApiTest" time="0.123" />
+  <testcase name="multiItemInsufficientStockDoesNotPartiallyDeductAndCanBeRetried" classname="com.example.coffee.HttpApiTest" time="0.045" />
+  <testcase name="unsupportedAndDuplicateItemsAreRejected" classname="com.example.coffee.HttpApiTest" time="0.03" />
+  <testcase name="mapperReadsObserveOtherCommittedWritesWithinReadCommittedTransaction" classname="com.example.coffee.HttpApiTest" time="0.013" />
+  <testcase name="referenceFlowMatchesProvidedFixtures" classname="com.example.coffee.HttpApiTest" time="0.355" />
+  <testcase name="strictJsonRejectsMalformedOrAmbiguousRequests(String)[1]" classname="com.example.coffee.HttpApiTest" time="0.014" />
+  <testcase name="strictJsonRejectsMalformedOrAmbiguousRequests(String)[2]" classname="com.example.coffee.HttpApiTest" time="0.011" />
+  <testcase name="strictJsonRejectsMalformedOrAmbiguousRequests(String)[3]" classname="com.example.coffee.HttpApiTest" time="0.009" />
+  <testcase name="strictJsonRejectsMalformedOrAmbiguousRequests(String)[4]" classname="com.example.coffee.HttpApiTest" time="0.015" />
+  <testcase name="strictJsonRejectsMalformedOrAmbiguousRequests(String)[5]" classname="com.example.coffee.HttpApiTest" time="0.012" />
+  <testcase name="strictJsonRejectsMalformedOrAmbiguousRequests(String)[6]" classname="com.example.coffee.HttpApiTest" time="0.008" />
+  <testcase name="paymentKeyIsScopedToOrder" classname="com.example.coffee.HttpApiTest" time="0.048" />
+  <testcase name="concurrentConflictingPayloadsChooseOneWinner" classname="com.example.coffee.HttpApiTest" time="0.025" />
+</testsuite>

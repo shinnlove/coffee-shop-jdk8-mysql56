@@ -1,0 +1,85 @@
+{
+  "jdk": "1.8.0_514 Zulu x86_64",
+  "maven": "3.6.3",
+  "mysql": [
+    "5.6.30",
+    "MySQL Community Server (GPL)"
+  ],
+  "native_full_verify": "PASS",
+  "init_sql_twice": "PASS",
+  "jar_startup_http": "PASS",
+  "mysql_and_app_restart": "PASS",
+  "demo": "PASS",
+  "invalid_shop_startup": "PASS",
+  "docker_engine": "UNAVAILABLE",
+  "docker_build_lifecycle": "NOT_RUN",
+  "release": "ver1.7",
+  "date": "2026-11-27",
+  "tests": [
+    {
+      "name": "com.example.coffee.ApiErrorMappingTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.example.coffee.HttpApiTest",
+      "tests": 40,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.example.coffee.InternalDiagnosticsTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.example.coffee.PersistenceRestartTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.example.coffee.PricingTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.example.coffee.ShopConfigurationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "tests_total": 71,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "source_sha256": "3f58af38a3a28197d2c578904eabb8df608bc7559d5fc272bce9ab3194611d52",
+  "source_hash_recipe": "sorted src files plus pom.xml and openapi.yaml; each relative path + NUL + bytes",
+  "docker_compose_version": "2.32.4 (CLI only)",
+  "docker_compose_config": "PASS",
+  "compose_schema": "PASS",
+  "shell_syntax": "PASS",
+  "original_four_files": "BYTE_IDENTICAL",
+  "contract_and_v1": "UNCHANGED_FROM_VER1.6",
+  "plantuml": "1.2024.8: both diagrams rendered to SVG",
+  "docker_bootstrap_sql": {
+    "target": "MySQL5.6.30",
+    "source": "docker/mysql/entrypoint.sh heredoc and escaping function",
+    "execution": "native MySQL, not a container",
+    "account_bootstrap_sql": "PASS",
+    "quote_backslash_passwords": "PASS",
+    "application_schema_grant": "PASS"
+  },
+  "final_delivery_gate": "Docker build and container lifecycle NOT_RUN: no Docker Engine/service; run scripts/docker-acceptance.sh on target Mac",
+  "jar_sha256": "47cbc0daa3d70b05719122c7fdb944d254e70eccf5183f90bc6696d107adba04"
+}

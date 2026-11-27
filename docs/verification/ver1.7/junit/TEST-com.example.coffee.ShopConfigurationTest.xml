@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="com.example.coffee.ShopConfigurationTest" tests="4" failures="0" errors="0" skipped="0" time="0.09">
+  <testcase name="rejectsConfiguredShopThatDoesNotExist" classname="com.example.coffee.ShopConfigurationTest" time="0.02" />
+  <testcase name="bindsConfiguredShopAndDoesNotFallBackToSeedId" classname="com.example.coffee.ShopConfigurationTest" time="0.029" />
+  <testcase name="rejectsMissingShopConfiguration" classname="com.example.coffee.ShopConfigurationTest" time="0.019" />
+  <testcase name="rejectsNonPositiveShopConfiguration" classname="com.example.coffee.ShopConfigurationTest" time="0.013" />
+</testsuite>

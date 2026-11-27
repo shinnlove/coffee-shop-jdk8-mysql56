@@ -1,0 +1,88 @@
+{
+  "release": "ver1.9",
+  "date": "2026-11-27",
+  "timezone": "Asia/Shanghai",
+  "scope": "Documentation, diagram rendering, source packaging and local Git workflow; no GitHub remote mutation.",
+  "business_source_unchanged_from_ver1_7": true,
+  "source_sha256": "3f58af38a3a28197d2c578904eabb8df608bc7559d5fc272bce9ab3194611d52",
+  "source_hash_recipe": "sorted src files plus pom.xml and openapi.yaml; each relative path + NUL + bytes",
+  "original_four_requirements_byte_identical": true,
+  "maven_wrapper": {
+    "maven": "3.6.3",
+    "java": "Zulu 1.8.0_514",
+    "execution": "PASS",
+    "distribution": "only-script",
+    "windows_script": "included; not executed on Windows"
+  },
+  "targeted_verify": {
+    "status": "PASS",
+    "tests": 30,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "reports": [
+      {
+        "name": "com.example.coffee.ApiErrorMappingTest",
+        "tests": "14",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.example.coffee.InternalDiagnosticsTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.example.coffee.PricingTest",
+        "tests": "9",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.example.coffee.ShopConfigurationTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      }
+    ],
+    "method": "Maven Wrapper on JDK8, offline existing dependency cache; initial obsolete local proxy configuration was discarded. No repository-specific settings distributed."
+  },
+  "full_mysql_suite": "NOT_RERUN; 71 ver1.7 executions retained separately with identical business source hash",
+  "docker_build_and_lifecycle": "NOT_RUN: Docker Engine unavailable",
+  "compose_v2_32_4_config": "PASS",
+  "shell_syntax": "PASS",
+  "shell_executables": [
+    "run-local.sh",
+    "run-debug.sh",
+    "mvnw",
+    "run-tests-local.sh",
+    "scripts/demo.sh",
+    "scripts/docker-acceptance.sh",
+    "docker/mysql/entrypoint.sh"
+  ],
+  "plantuml": "1.2024.8: overview, ER and business sequence rendered to SVG",
+  "common_file_count": 8,
+  "common_files_identical": true,
+  "git_workflow": {
+    "master_commits": 1,
+    "feature_commits_ahead_of_master": 1,
+    "local_ignored_assets_staged": 0,
+    "shared_file_changes": 0,
+    "local_bare_push_clone": "PASS"
+  },
+  "links": {
+    "local_and_implementation_targets": "PASS",
+    "public_links_to_private_content": 0,
+    "external_links": "Not all external websites are guaranteed reachable. Implementation URLs intentionally reference the named feature branch, which the owner will publish."
+  },
+  "not_executed": [
+    "GitHub repository creation, push or PR",
+    "Docker Engine builds / lifecycle / bind mounts",
+    "Intel Mac or Windows target runtime"
+  ]
+}

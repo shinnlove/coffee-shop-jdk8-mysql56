@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.coffee.persistence.dao.IdempotencyDao">
+  <resultMap id="idempotencyResultMap" type="IdempotencyDO" autoMapping="false">
+    <id column="id" property="id"/>
+    <result column="scope" property="scope"/>
+    <result column="request_key" property="requestKey"/>
+    <result column="request_hash" property="requestHash"/>
+    <result column="http_status" property="httpStatus"/>
+    <result column="response_body" property="responseBody"/>
+    <result column="create_time" property="createTime" typeHandler="com.example.coffee.persistence.typehandler.UtcInstantTypeHandler"/>
+    <result column="update_time" property="updateTime" typeHandler="com.example.coffee.persistence.typehandler.UtcInstantTypeHandler"/>
+  </resultMap>
+
+<!-- 自增 id 仅是记录主键；请求身份仍为唯一键 (scope, request_key)。 -->
+  <!-- 预插入整条幂等记录；重复键保留已有摘要和响应，不能根据影响行数判断是否首次请求。 -->
+  <insert id="preInsertIdempotencyRecord">
+    INSERT INTO idempotency_record (scope, request_key, request_hash)
+    VALUES (#{scope}, #{requestKey,jdbcType=VARBINARY}, #{requestHash})
+    ON DUPLICATE KEY UPDATE request_hash = request_hash
+  </insert>
+  <select id="selectByScopeAndKeyForUpdate" resultMap="idempotencyResultMap" useCache="false" flushCache="true">
+    SELECT id, scope, request_key, request_hash, http_status, response_body, create_time, update_time
+    FROM idempotency_record
+    WHERE scope = #{scope} AND request_key = #{requestKey,jdbcType=VARBINARY}
+    FOR UPDATE
+  </select>
+  <update id="updateResponseById">
+    UPDATE idempotency_record SET http_status = #{httpStatus}, response_body = #{responseBody}
+    WHERE id = #{id}
+  </update>
+</mapper>

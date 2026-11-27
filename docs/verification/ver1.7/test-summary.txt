@@ -1,0 +1,9 @@
+ver1.7 | JDK 1.8.0_514 | Maven 3.6.3 | MySQL 5.6.30 Community Server (GPL)
+com.example.coffee.ApiErrorMappingTest: tests=14, failures=0, errors=0, skipped=0
+com.example.coffee.HttpApiTest: tests=40, failures=0, errors=0, skipped=0
+com.example.coffee.InternalDiagnosticsTest: tests=3, failures=0, errors=0, skipped=0
+com.example.coffee.PersistenceRestartTest: tests=1, failures=0, errors=0, skipped=0
+com.example.coffee.PricingTest: tests=9, failures=0, errors=0, skipped=0
+com.example.coffee.ShopConfigurationTest: tests=4, failures=0, errors=0, skipped=0
+TOTAL: tests=71, failures=0, errors=0, skipped=0
+Docker runtime: NOT RUN (engine unavailable)

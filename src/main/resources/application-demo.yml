@@ -1,0 +1,5 @@
+# Public LOCAL DEMO account only: owner / coffee-demo-2026.
+# Application startup without this profile requires OWNER_PASSWORD_HASH.
+shop:
+  owner:
+    password-hash: ${OWNER_PASSWORD_HASH:$2b$12$Qea0OigS/Duh46uzVPAhKOmj0avNjunbpVV4RDmo8U2mnDJlCdbYa}

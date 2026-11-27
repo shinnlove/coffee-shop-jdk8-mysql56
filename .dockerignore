@@ -1,0 +1,13 @@
+target
+.local
+.git
+.idea
+*.iml
+.env
+.env.*
+!.env.example
+docs
+dist
+docker/data
+docker/results
+.DS_Store
