@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.coffee.persistence.dao.ComboOfferDao">
+  <resultMap id="comboOfferResultMap" type="ComboOfferDO" autoMapping="false">
+    <id column="id" property="id"/>
+    <result column="offer_code" property="offerCode"/>
+    <result column="name" property="name"/>
+    <result column="first_item_id" property="firstItemId"/>
+    <result column="second_item_id" property="secondItemId"/>
+    <result column="bundle_price_minor" property="bundlePriceMinor"/>
+    <result column="active" property="active" javaType="java.lang.Boolean" jdbcType="TINYINT"/>
+    <result column="create_time" property="createTime" typeHandler="com.example.coffee.persistence.typehandler.UtcInstantTypeHandler"/>
+    <result column="update_time" property="updateTime" typeHandler="com.example.coffee.persistence.typehandler.UtcInstantTypeHandler"/>
+  </resultMap>
+
+<select id="findActive" resultMap="comboOfferResultMap">
+    SELECT id, offer_code, name, first_item_id, second_item_id, bundle_price_minor, active, create_time, update_time FROM combo_offer WHERE active = 1 ORDER BY offer_code
+  </select>
+</mapper>

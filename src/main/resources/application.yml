@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: coffee-shop
+  profiles:
+    group:
+      local: demo
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/coffee_shop?serverTimezone=UTC&characterEncoding=UTF-8}
+    username: ${DB_USERNAME:coffee_app}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 12
+      connection-timeout: 5000
+      connection-init-sql: SET SESSION innodb_lock_wait_timeout=5, time_zone='+00:00', default_storage_engine='InnoDB', sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' 
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+      accept-float-as-int: false
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+  type-aliases-package: com.example.coffee.persistence.dataobject
+  type-handlers-package: com.example.coffee.persistence.typehandler
+  configuration:
+    # Every statement reaches the database; locking reads must never reuse a cached row.
+    local-cache-scope: STATEMENT
+    cache-enabled: false
+    auto-mapping-behavior: NONE
+    default-executor-type: SIMPLE
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+server:
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+shop:
+  default-shop-id: ${DEFAULT_SHOP_ID:1}
+  owner:
+    username: ${OWNER_USERNAME:owner}
+    password-hash: ${OWNER_PASSWORD_HASH:}

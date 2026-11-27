@@ -1,0 +1,306 @@
+openapi: 3.0.3
+info:
+  title: Coffee Shop Case Study Reference API
+  version: 1.0.0
+  description: >-
+    Reference contract for the senior-level implementation slices. A complete
+    coffee-shop product may add owner catalogue/discount/report operations.
+servers:
+  - url: http://localhost:8080
+    description: Local candidate service or contract-backed mock
+tags:
+  - name: Customer
+  - name: Owner
+paths:
+  /api/v1/menu:
+    get:
+      tags: [Customer]
+      operationId: getMenu
+      summary: Retrieve available menu and promotions
+      responses:
+        '200':
+          description: Menu snapshot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Menu' }
+  /api/v1/orders:
+    post:
+      tags: [Customer]
+      operationId: createOrder
+      summary: Create an order with authoritative server pricing
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateOrderRequest' }
+      responses:
+        '201':
+          description: Order created, or existing same-key/same-payload order replayed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /api/v1/orders/{orderId}:
+    get:
+      tags: [Customer]
+      operationId: getOrder
+      summary: Retrieve order and its authoritative payment state
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/orders/{orderId}/payments/mock:
+    post:
+      tags: [Customer]
+      operationId: simulatePayment
+      summary: Deterministically approve or decline a payment attempt
+      description: >-
+        APPROVE atomically checks and deducts inventory, marks the order PAID,
+        and creates one receipt. DECLINE keeps the order PENDING_PAYMENT.
+        Repeated approvals for PAID orders do not change inventory again.
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MockPaymentRequest' }
+      responses:
+        '200':
+          description: Approved, declined or safely replayed result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/v1/orders/{orderId}/receipt:
+    get:
+      tags: [Customer]
+      operationId: getReceipt
+      summary: Retrieve receipt, available only after confirmed payment
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Receipt for a paid order
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Receipt' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/v1/owner/orders:
+    get:
+      tags: [Owner]
+      operationId: getPaidOrders
+      security:
+        - ownerBasic: []
+      summary: List paid orders, ascending by paidAt then orderNumber
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Currently only PAID is supported in this assessment slice
+          schema:
+            type: string
+            enum: [PAID]
+            default: PAID
+      responses:
+        '200':
+          description: Sorted paid orders
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaidOrdersResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+components:
+  securitySchemes:
+    ownerBasic:
+      type: http
+      scheme: basic
+      description: Demo-only HTTP Basic scheme; use TLS in any real deployment.
+  parameters:
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Client-generated unique request identifier; identical key/payload replays prior result, mismatched payload produces 409.
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+  responses:
+    BadRequest:
+      description: Malformed or unsupported request
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    Conflict:
+      description: Invalid state, insufficient stock or idempotency-key payload conflict
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    Unprocessable:
+      description: Semantically invalid input
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    Unauthorized:
+      description: Owner authentication required
+      headers:
+        WWW-Authenticate:
+          schema: { type: string }
+          description: Basic authentication challenge
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+  schemas:
+    Category:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, example: beverages }
+        name: { type: string, example: Beverages }
+    MenuItem:
+      type: object
+      required: [id, categoryId, name, priceMinor, currency, availableStock, available]
+      properties:
+        id: { type: string, example: cappuccino }
+        categoryId: { type: string, example: beverages }
+        name: { type: string, example: Cappuccino }
+        priceMinor: { type: integer, format: int64, minimum: 0, example: 450 }
+        currency: { type: string, minLength: 3, maxLength: 3, example: USD }
+        availableStock: { type: integer, minimum: 0, example: 10 }
+        available: { type: boolean, example: true }
+    ComboOffer:
+      type: object
+      required: [id, name, firstItemId, secondItemId, bundlePriceMinor, active]
+      properties:
+        id: { type: string, example: coffee-pastry }
+        name: { type: string, example: Coffee and pastry }
+        firstItemId: { type: string, example: cappuccino }
+        secondItemId: { type: string, example: croissant }
+        bundlePriceMinor: { type: integer, format: int64, minimum: 0, example: 700 }
+        active: { type: boolean, example: true }
+    Menu:
+      type: object
+      required: [currency, categories, items, comboOffers]
+      properties:
+        currency: { type: string, example: USD }
+        categories:
+          type: array
+          items: { $ref: '#/components/schemas/Category' }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/MenuItem' }
+        comboOffers:
+          type: array
+          items: { $ref: '#/components/schemas/ComboOffer' }
+    CreateOrderRequest:
+      type: object
+      required: [customerName, items]
+      properties:
+        customerName: { type: string, minLength: 1, maxLength: 80, example: Alex }
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [itemId, quantity]
+            properties:
+              itemId: { type: string, example: cappuccino }
+              quantity: { type: integer, minimum: 1, maximum: 20, example: 2 }
+    OrderLine:
+      type: object
+      required: [itemId, name, unitPriceMinor, quantity, lineTotalMinor]
+      properties:
+        itemId: { type: string }
+        name: { type: string }
+        unitPriceMinor: { type: integer, format: int64 }
+        quantity: { type: integer, minimum: 1 }
+        lineTotalMinor: { type: integer, format: int64 }
+    Order:
+      type: object
+      required: [id, orderNumber, customerName, status, currency, lines, subtotalMinor, discountMinor, totalMinor, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        orderNumber: { type: string, example: C-1001 }
+        customerName: { type: string, example: Alex }
+        status: { type: string, enum: [PENDING_PAYMENT, PAID] }
+        currency: { type: string, example: USD }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/OrderLine' }
+        subtotalMinor: { type: integer, format: int64, minimum: 0 }
+        discountMinor: { type: integer, format: int64, minimum: 0 }
+        totalMinor: { type: integer, format: int64, minimum: 0 }
+        createdAt: { type: string, format: date-time }
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+    MockPaymentRequest:
+      type: object
+      required: [outcome]
+      properties:
+        outcome: { type: string, enum: [APPROVE, DECLINE] }
+    PaymentResult:
+      type: object
+      required: [outcome, order]
+      properties:
+        outcome: { type: string, enum: [APPROVED, DECLINED] }
+        order: { $ref: '#/components/schemas/Order' }
+    Receipt:
+      type: object
+      required: [orderNumber, customerName, currency, totalMinor, paidAt, lines]
+      properties:
+        orderNumber: { type: string }
+        customerName: { type: string }
+        currency: { type: string }
+        subtotalMinor: { type: integer, format: int64 }
+        discountMinor: { type: integer, format: int64 }
+        totalMinor: { type: integer, format: int64 }
+        paidAt: { type: string, format: date-time }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/OrderLine' }
+    PaidOrdersResponse:
+      type: object
+      required: [orders]
+      properties:
+        orders:
+          type: array
+          items: { $ref: '#/components/schemas/Order' }
+    ApiError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: INSUFFICIENT_STOCK
+          description: Stable machine-readable error identifier.
+        message: { type: string, example: Requested quantity is not available. }
+        details:
+          type: object
+          additionalProperties: true

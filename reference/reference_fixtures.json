@@ -1,0 +1,231 @@
+{
+  "menu": {
+    "currency": "USD",
+    "categories": [
+      {
+        "id": "beverages",
+        "name": "Beverages"
+      },
+      {
+        "id": "bakery",
+        "name": "Bakery"
+      }
+    ],
+    "items": [
+      {
+        "id": "cappuccino",
+        "categoryId": "beverages",
+        "name": "Cappuccino",
+        "priceMinor": 450,
+        "currency": "USD",
+        "availableStock": 10,
+        "available": true
+      },
+      {
+        "id": "croissant",
+        "categoryId": "bakery",
+        "name": "Croissant",
+        "priceMinor": 350,
+        "currency": "USD",
+        "availableStock": 8,
+        "available": true
+      },
+      {
+        "id": "cookie",
+        "categoryId": "bakery",
+        "name": "Cookie",
+        "priceMinor": 250,
+        "currency": "USD",
+        "availableStock": 12,
+        "available": true
+      }
+    ],
+    "comboOffers": [
+      {
+        "id": "coffee-pastry",
+        "name": "Coffee and pastry",
+        "firstItemId": "cappuccino",
+        "secondItemId": "croissant",
+        "bundlePriceMinor": 700,
+        "active": true
+      }
+    ]
+  },
+  "createOrderRequest": {
+    "customerName": "Alex",
+    "items": [
+      {
+        "itemId": "cappuccino",
+        "quantity": 2
+      },
+      {
+        "itemId": "croissant",
+        "quantity": 1
+      }
+    ]
+  },
+  "orderPending": {
+    "id": "b109b052-a064-4f4f-8fa1-40f93bc18706",
+    "orderNumber": "C-1001",
+    "customerName": "Alex",
+    "status": "PENDING_PAYMENT",
+    "currency": "USD",
+    "lines": [
+      {
+        "itemId": "cappuccino",
+        "name": "Cappuccino",
+        "unitPriceMinor": 450,
+        "quantity": 2,
+        "lineTotalMinor": 900
+      },
+      {
+        "itemId": "croissant",
+        "name": "Croissant",
+        "unitPriceMinor": 350,
+        "quantity": 1,
+        "lineTotalMinor": 350
+      }
+    ],
+    "subtotalMinor": 1250,
+    "discountMinor": 100,
+    "totalMinor": 1150,
+    "createdAt": "2026-11-03T08:00:00Z",
+    "paidAt": null
+  },
+  "mockPaymentRequest": {
+    "outcome": "APPROVE"
+  },
+  "paymentApproved": {
+    "outcome": "APPROVED",
+    "order": {
+      "id": "b109b052-a064-4f4f-8fa1-40f93bc18706",
+      "orderNumber": "C-1001",
+      "customerName": "Alex",
+      "status": "PAID",
+      "currency": "USD",
+      "lines": [
+        {
+          "itemId": "cappuccino",
+          "name": "Cappuccino",
+          "unitPriceMinor": 450,
+          "quantity": 2,
+          "lineTotalMinor": 900
+        },
+        {
+          "itemId": "croissant",
+          "name": "Croissant",
+          "unitPriceMinor": 350,
+          "quantity": 1,
+          "lineTotalMinor": 350
+        }
+      ],
+      "subtotalMinor": 1250,
+      "discountMinor": 100,
+      "totalMinor": 1150,
+      "createdAt": "2026-11-03T08:00:00Z",
+      "paidAt": "2026-11-03T08:01:10Z"
+    }
+  },
+  "paymentDeclined": {
+    "outcome": "DECLINED",
+    "order": {
+      "id": "b109b052-a064-4f4f-8fa1-40f93bc18706",
+      "orderNumber": "C-1001",
+      "customerName": "Alex",
+      "status": "PENDING_PAYMENT",
+      "currency": "USD",
+      "lines": [
+        {
+          "itemId": "cappuccino",
+          "name": "Cappuccino",
+          "unitPriceMinor": 450,
+          "quantity": 2,
+          "lineTotalMinor": 900
+        },
+        {
+          "itemId": "croissant",
+          "name": "Croissant",
+          "unitPriceMinor": 350,
+          "quantity": 1,
+          "lineTotalMinor": 350
+        }
+      ],
+      "subtotalMinor": 1250,
+      "discountMinor": 100,
+      "totalMinor": 1150,
+      "createdAt": "2026-11-03T08:00:00Z",
+      "paidAt": null
+    }
+  },
+  "receipt": {
+    "orderNumber": "C-1001",
+    "customerName": "Alex",
+    "currency": "USD",
+    "subtotalMinor": 1250,
+    "discountMinor": 100,
+    "totalMinor": 1150,
+    "paidAt": "2026-11-03T08:01:10Z",
+    "lines": [
+      {
+        "itemId": "cappuccino",
+        "name": "Cappuccino",
+        "unitPriceMinor": 450,
+        "quantity": 2,
+        "lineTotalMinor": 900
+      },
+      {
+        "itemId": "croissant",
+        "name": "Croissant",
+        "unitPriceMinor": 350,
+        "quantity": 1,
+        "lineTotalMinor": 350
+      }
+    ]
+  },
+  "ownerPaidQueue": {
+    "orders": [
+      {
+        "id": "b109b052-a064-4f4f-8fa1-40f93bc18706",
+        "orderNumber": "C-1001",
+        "customerName": "Alex",
+        "status": "PAID",
+        "currency": "USD",
+        "lines": [
+          {
+            "itemId": "cappuccino",
+            "name": "Cappuccino",
+            "unitPriceMinor": 450,
+            "quantity": 2,
+            "lineTotalMinor": 900
+          },
+          {
+            "itemId": "croissant",
+            "name": "Croissant",
+            "unitPriceMinor": 350,
+            "quantity": 1,
+            "lineTotalMinor": 350
+          }
+        ],
+        "subtotalMinor": 1250,
+        "discountMinor": 100,
+        "totalMinor": 1150,
+        "createdAt": "2026-11-03T08:00:00Z",
+        "paidAt": "2026-11-03T08:01:10Z"
+      }
+    ]
+  },
+  "errors": {
+    "insufficientStock": {
+      "code": "INSUFFICIENT_STOCK",
+      "message": "Requested quantity is not available."
+    },
+    "unpaidReceipt": {
+      "code": "ORDER_NOT_PAID",
+      "message": "Receipt is available only after confirmed payment."
+    },
+    "idempotencyConflict": {
+      "code": "IDEMPOTENCY_KEY_REUSED",
+      "message": "Key has already been used with a different request body."
+    }
+  }
+}

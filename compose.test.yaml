@@ -1,0 +1,56 @@
+services:
+  test-db:
+    image: coffee-shop-mysql:5.6.30
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: docker/mysql/Dockerfile
+    profiles: [test]
+    environment:
+      MYSQL_DATABASE: coffee_shop_test
+      MYSQL_USER: coffee_test
+      MYSQL_PASSWORD: coffee-test-only
+      MYSQL_ROOT_PASSWORD: coffee-test-root-only
+    volumes:
+      - type: bind
+        source: ${MYSQL_TEST_DATA_DIR:-./docker/data/mysql-test}
+        target: /var/lib/mysql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          MYSQL_PWD="$$MYSQL_PASSWORD" mysql --protocol=tcp -h127.0.0.1
+          -u"$$MYSQL_USER" -D"$$MYSQL_DATABASE" -e 'SELECT 1' >/dev/null 2>&1
+      interval: 3s
+      timeout: 3s
+      start_period: 60s
+      retries: 40
+    stop_grace_period: 60s
+  tests:
+    image: coffee-shop-tests:1.9
+    platform: linux/amd64
+    build:
+      context: .
+      target: verification
+    profiles: [test]
+    environment:
+      TEST_DB_URL: jdbc:mysql://test-db:3306/coffee_shop_test?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+      TEST_DB_USERNAME: coffee_test
+      TEST_DB_PASSWORD: coffee-test-only
+    volumes:
+      - type: bind
+        source: ${TEST_RESULTS_DIR:-./docker/results/tests}
+        target: /results
+    depends_on:
+      test-db:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        java -version
+        mvn -version
+        mvn -B verify
+        result=$$?
+        mkdir -p /results/surefire-reports
+        cp -R target/surefire-reports/. /results/surefire-reports/ || exit 1
+        exit $$result

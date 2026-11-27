@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.coffee.persistence.dao.OrderDao">
+  <resultMap id="orderResultMap" type="OrderDO" autoMapping="false">
+    <id column="id" property="id"/>
+    <result column="order_uuid" property="orderUuid"/>
+    <result column="customer_name" property="customerName"/>
+    <result column="status" property="status"/>
+    <result column="currency" property="currency"/>
+    <result column="subtotal_minor" property="subtotalMinor"/>
+    <result column="discount_minor" property="discountMinor"/>
+    <result column="total_minor" property="totalMinor"/>
+    <result column="paid_at" property="paidAt" typeHandler="com.example.coffee.persistence.typehandler.UtcInstantTypeHandler"/>
+    <result column="create_time" property="createTime" typeHandler="com.example.coffee.persistence.typehandler.UtcInstantTypeHandler"/>
+    <result column="update_time" property="updateTime" typeHandler="com.example.coffee.persistence.typehandler.UtcInstantTypeHandler"/>
+  </resultMap>
+
+<sql id="orderColumns">
+    id, order_uuid, customer_name, status, currency, subtotal_minor, discount_minor,
+    total_minor, paid_at, create_time, update_time
+  </sql>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+    INSERT INTO customer_order
+      (order_uuid, customer_name, status, currency, subtotal_minor, discount_minor, total_minor, create_time)
+    VALUES
+      (#{orderUuid}, #{customerName}, #{status}, #{currency}, #{subtotalMinor},
+       #{discountMinor}, #{totalMinor}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <select id="findByUuid" resultMap="orderResultMap">
+    SELECT <include refid="orderColumns"/> FROM customer_order WHERE order_uuid = #{orderUuid}
+  </select>
+  <!-- 入口 UUID 通过唯一索引锁订单，返回内部 id 供后续关联和更新使用。 -->
+  <select id="selectByUuidForUpdate" resultMap="orderResultMap" useCache="false" flushCache="true">
+    SELECT <include refid="orderColumns"/> FROM customer_order WHERE order_uuid = #{orderUuid} FOR UPDATE
+  </select>
+  <update id="markPaid">
+    UPDATE customer_order SET status = 2, paid_at = #{paidAt,jdbcType=TIMESTAMP}
+    WHERE id = #{id} AND status = 1
+  </update>
+  <select id="findPaid" resultMap="orderResultMap">
+    SELECT <include refid="orderColumns"/> FROM customer_order
+    WHERE status = 2 ORDER BY paid_at, CONCAT('C-', id)
+  </select>
+</mapper>

@@ -1,0 +1,8 @@
+# Explicit local-development defaults; run-local.sh activates local + demo.
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/coffee_shop?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8}
+    username: ${DB_USERNAME:coffee_app}
+    password: ${DB_PASSWORD:coffee-local-only}
+server:
+  address: 127.0.0.1

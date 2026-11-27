@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-initial-schema
+      author: coffee-shop
+      changes:
+        - sqlFile:
+            path: db/migration/V1__schema.sql
+            splitStatements: true
+            stripComments: true

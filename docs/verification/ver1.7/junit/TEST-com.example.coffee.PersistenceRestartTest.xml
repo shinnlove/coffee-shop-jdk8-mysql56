@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="com.example.coffee.PersistenceRestartTest" tests="1" failures="0" errors="0" skipped="0" time="4.55">
+  <testcase name="committedOrderReceiptInventoryAndIdempotencySurviveApplicationRestart" classname="com.example.coffee.PersistenceRestartTest" time="4.538" />
+</testsuite>

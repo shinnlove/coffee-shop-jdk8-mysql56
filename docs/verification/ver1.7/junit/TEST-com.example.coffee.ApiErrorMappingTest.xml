@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="com.example.coffee.ApiErrorMappingTest" tests="14" failures="0" errors="0" skipped="0" time="0.172">
+  <testcase name="businessFailureKeepsOriginalStatusCodeAndBody" classname="com.example.coffee.ApiErrorMappingTest" time="0.004" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[1]" classname="com.example.coffee.ApiErrorMappingTest" time="0.011" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[2]" classname="com.example.coffee.ApiErrorMappingTest" time="0.003" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[3]" classname="com.example.coffee.ApiErrorMappingTest" time="0.002" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[4]" classname="com.example.coffee.ApiErrorMappingTest" time="0.004" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[5]" classname="com.example.coffee.ApiErrorMappingTest" time="0.003" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[6]" classname="com.example.coffee.ApiErrorMappingTest" time="0.003" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[7]" classname="com.example.coffee.ApiErrorMappingTest" time="0.003" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[8]" classname="com.example.coffee.ApiErrorMappingTest" time="0.003" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[9]" classname="com.example.coffee.ApiErrorMappingTest" time="0.003" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[10]" classname="com.example.coffee.ApiErrorMappingTest" time="0.003" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[11]" classname="com.example.coffee.ApiErrorMappingTest" time="0.003" />
+  <testcase name="classifiesFailuresWithoutExposingInternalMessages(RuntimeException, int)[12]" classname="com.example.coffee.ApiErrorMappingTest" time="0.003" />
+  <testcase name="ownerStatusValidationUsesTheSameErrorContract" classname="com.example.coffee.ApiErrorMappingTest" time="0.003" />
+</testsuite>
