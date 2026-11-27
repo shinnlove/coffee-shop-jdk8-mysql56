@@ -1,0 +1,177 @@
+@startuml coffee_shop_business_sequence
+title Coffee Shop 菜单、创建订单、模拟支付与查询
+autonumber
+hide footbox
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Noto Sans CJK SC
+skinparam defaultFontSize 13
+skinparam ArrowColor #335C67
+skinparam entityBackgroundColor #EDF5F4
+skinparam entityBorderColor #335C67
+skinparam noteBackgroundColor #FFF7E6
+skinparam noteBorderColor #D4B878
+skinparam sequenceParticipantBackgroundColor #EDF5F4
+skinparam sequenceParticipantBorderColor #335C67
+skinparam sequenceGroupBorderColor #9AB6BD
+
+participant "HTTP / Controller" as C
+participant "IdempotencyService\nTransactionTemplate" as I
+participant "业务 Service\nMenu / Order / Payment / Inventory / Receipt" as S
+participant "MyBatis DAO\nXML 映射" as D
+database "MySQL / InnoDB" as DB
+
+== 查询菜单：不预占库存 ==
+[-> C : GET /api/v1/menu
+C -> S : MenuService.getMenu()
+S -> D : 按配置的 default-shop-id 读取店铺；读取分类、商品、库存、启用套餐
+D -> DB : 普通 SELECT
+DB --> D : 内部整型 ID / code / 价格 / stock_quantity
+D --> S : DO
+S -> S : 整型关联；转换为原 categoryId / itemId / offerId
+S --> C : Menu（原 1+1 规则）
+[<- C : 200 菜单与优惠信息
+
+== 创建订单：幂等记录与订单同事务 ==
+[-> C : POST /orders + Idempotency-Key
+C -> C : 请求校验、姓名去空白、商品排序、拒绝重复商品行
+C -> I : executeIdempotentRequest("orders:create", idempotencyKey, normalizedRequest, 201, businessAction)
+I -> I : 校验 key，计算请求摘要
+I -> DB : 开启 READ_COMMITTED 事务（超时 15 秒）
+I -> D : preInsertIdempotencyRecord + selectByScopeAndKeyForUpdate
+D -> DB : INSERT ... ON DUPLICATE KEY UPDATE（不覆盖原摘要）
+note right of DB
+  同 scope/key 的并发请求在唯一键冲突处等待。
+  等待前一事务提交后读其结果；回滚后可继续执行。
+end note
+D -> DB : SELECT ... FOR UPDATE 幂等记录
+DB --> D : 当前记录
+D --> I : request_hash / 原响应
+alt 同 key，不同请求内容
+  I -> DB : ROLLBACK
+  I --> C : 409 IDEMPOTENCY_KEY_REUSED
+else 同 key、同内容，已有响应
+  I -> DB : COMMIT，释放幂等锁
+  I --> C : 回放原 HTTP 状态及 JSON；不重新计价
+else 新请求，需要执行业务
+  I -> S : businessAction -> OrderService.createOrder()
+  note over I,S
+    @RequireWriteTransaction(MANDATORY) 加入已有可写事务。
+    不在业务方法返回时提交或释放锁。
+  end note
+  S -> D : 读取当前菜单、商品库存及套餐规则
+  D -> DB : 普通 SELECT（无库存预占）
+  DB --> S : 当前目录与库存
+  S -> S : Pricing.calculate：检查库存、原价、1+1 折扣
+  alt 商品或库存校验失败
+    S --> I : 抛出业务异常
+    I -> DB : ROLLBACK（包含本次幂等占位）
+    I --> C : 对应 4xx
+  else 校验通过
+    S -> D : INSERT customer_order（order_uuid + 金额快照）
+    D -> DB : 写主表并返回自增 id
+    DB --> S : 内部 Long 订单主键
+    loop 每种购买商品
+      S -> D : INSERT order_line（整型 order_id / item_id）
+      D -> DB : 保存名称、单价、数量快照
+    end
+    S -> D : 读取订单与明细（商品 code 不过滤 active）
+    D -> DB : 按 order_uuid 查主表；按内部 order_id 查明细
+    DB --> S : 待付款订单快照
+    S --> I : Order（内部 ID 不进入 JSON）
+    I -> D : updateResponseById：保存 201 和原始响应 JSON
+    D -> DB : UPDATE idempotency_record WHERE id = 内部记录主键
+    I -> DB : COMMIT；所有写入一起提交，释放锁
+    I --> C : 201 PENDING_PAYMENT
+  end
+end
+[<- C : 创建结果或原始响应回放
+
+== 模拟支付：先订单锁，再按内部商品 ID 升序锁库存 ==
+[-> C : POST /orders/{UUID}/payments/mock
+C -> I : executeIdempotentRequest("orders:{UUID}:pay", idempotencyKey, request, 200, businessAction)
+I -> DB : 开启 READ_COMMITTED 事务
+ref over I,DB
+  复用上面的幂等占位 / 锁定 / 指纹校验 / 回放协议。
+  下方仅展开需要执行 businessAction 的请求；历史回放不重复执行业务。
+end ref
+I -> S : PaymentService.processMockPayment(UUID, APPROVE / DECLINE)
+S -> D : OrderDao.selectByUuidForUpdate(UUID)
+D -> DB : SELECT customer_order WHERE order_uuid = ? FOR UPDATE
+DB --> S : 订单当前状态与内部 id（锁持有至外层事务结束）
+S -> D : OrderLineDao.findByOrderId(内部订单 id)
+D -> DB : 查询商品明细快照及公开编码
+DB --> S : Order + lines
+note over S,DB
+  不同 key 支付同一订单，必须竞争此订单行锁。
+  后获得锁的请求读到先提交的 PAID，跳过重复扣库存。
+end note
+alt 已支付 + DECLINE
+  S --> I : ORDER_ALREADY_PAID 异常
+else 已支付 + APPROVE
+  S --> I : 已支付结果；不扣库存、不重复生成小票
+else 待付款 + DECLINE
+  S --> I : DECLINED；保持待付款，不扣库存
+else 待付款 + APPROVE
+  S -> S : 订单明细按内部 item_id 升序排列
+  loop 每种商品：先锁定并检查全部库存
+    S -> D : ItemInventoryDao.selectByItemIdForUpdate(itemId)
+    D -> DB : SELECT item_inventory WHERE item_id = ? FOR UPDATE
+    DB --> S : stock_quantity 当前值
+  end
+  alt 任一商品库存不足
+    S --> I : INSUFFICIENT_STOCK 异常
+  else 全部满足
+    loop 每种商品：扣减与记录流水
+      S -> D : ItemInventoryDao.deductStock(itemId, quantity)
+      D -> DB : UPDATE item_inventory SET stock_quantity = stock_quantity - quantity\nWHERE item_id = ? AND stock_quantity >= quantity
+      S -> D : InventoryChangeLogDao.insert(orderId, itemId, quantity)
+      D -> DB : INSERT inventory_change_log\nUK(order_id, item_id) 防重复
+    end
+    S -> D : markPaid(内部订单 id, paidAt)
+    D -> DB : UPDATE customer_order SET status=2\nWHERE id=? AND status=1
+    S -> D : 读取已支付快照并 INSERT receipt
+    D -> DB : 订单/明细 SELECT + 小票 INSERT（UK order_id）
+    S --> I : APPROVED + 已支付订单
+  end
+end
+alt businessAction 正常返回（包括 DECLINED / 已支付 APPROVE）
+  I -> D : updateResponseById：保存 HTTP 200 与响应 JSON
+  D -> DB : 更新本次幂等记录
+  I -> DB : COMMIT，释放全部幂等/订单/库存锁
+  I --> C : 200 支付结果
+else 任何业务/数据库异常
+  I -> DB : ROLLBACK，释放全部锁
+  note over I,DB
+    库存、流水、订单状态、小票和本次幂等占位一起回滚。
+    库存不足返回 409；锁等待超时/死锁等可重试故障返回 503。
+    不吞掉异常后提交；同一请求可复用 key 重试。
+  end note
+  I --> C : ErrorCode 对应的 HTTP 状态与错误体
+end
+[<- C : 支付结果或明确错误
+
+== 查询订单、小票与店家队列 ==
+[-> C : GET /orders/{UUID} 或 /orders/{UUID}/receipt
+C -> S : 查订单；小票要求订单已 PAID
+S -> D : UUID 定位订单，再用内部 order_id 查询
+D -> DB : 普通 SELECT；使用已保存的价格/小票快照
+DB --> C : 原 API 字段，或 404 / ORDER_NOT_PAID
+[<- C : 查询响应
+[-> C : GET /owner/orders + Basic Auth
+note over C
+  Spring Security 校验店家身份与 OWNER 角色。
+  无凭据/错误凭据返回 401；无权限返回 403。
+end note
+C -> S : 已认证的店家查询
+S -> D : findPaid()
+D -> DB : WHERE status=2 ORDER BY paid_at, CONCAT('C-', id)
+DB --> C : 已付款订单队列
+[<- C : 200
+
+legend bottom
+  此图按业务调用顺序展示多个流程；Controller / Service / DAO 均是职责分组。
+  对外契约、1+1 计价方式、创建不预占库存、支付时扣减保持原行为。
+  业务方允许按作业规模选择；本版保留不重叠 1+1，显式套餐和最优价属于扩展。
+endlegend
+@enduml

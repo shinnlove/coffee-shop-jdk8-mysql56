@@ -1,0 +1,45 @@
+@startuml coffee_shop_overview
+title 付款一次，库存只扣一次
+hide footbox
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Noto Sans CJK SC
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam sequence {
+  ArrowColor #335C67
+  LifeLineBorderColor #B6C9CC
+  ParticipantBackgroundColor #E8F3F2
+  ParticipantBorderColor #335C67
+  ParticipantFontColor #183C44
+  GroupBorderColor #9AB6BD
+  GroupBackgroundColor #F3F8F9
+  GroupHeaderFontColor #183C44
+  MessageAlign center
+}
+participant "顾客请求" as Client
+participant "请求幂等" as Idem
+participant "订单与库存" as Payment
+database "MySQL / InnoDB" as DB
+
+Client -> Idem : orderId + Idempotency-Key + APPROVE
+group 同一个 TransactionTemplate 事务 · READ COMMITTED
+  Idem -> DB : 幂等占位、锁定与内容校验
+  alt 已有相同请求结果
+    DB --> Idem : 原状态码 + 原 JSON
+  else 执行业务
+    Idem -> Payment : 支付处理
+    Payment -> DB : 先锁订单；已 PAID 则不重复扣减
+    Payment -> DB : 按商品 ID 升序锁库存，检查全部数量
+    Payment -> DB : 扣库存 + 流水 + PAID + 小票
+    Payment --> Idem : 支付结果
+    Idem -> DB : 保存本次幂等响应
+  end
+  Idem -> DB : 提交；任一步骤失败则整体回滚
+end
+Idem --> Client : 原操作响应 / 明确错误
+note over Client,DB #FFF3DC
+下单固定价格、不预占库存；此图展示 APPROVE 主路径。
+DECLINE 保持待付款；库存不足返回 409。完整分支见下方时序图。
+end note
+@enduml

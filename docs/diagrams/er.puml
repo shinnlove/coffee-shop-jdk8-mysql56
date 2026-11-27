@@ -1,0 +1,146 @@
+@startuml coffee_shop_er
+title Coffee Shop ER（全部为逻辑关联，无物理外键）
+left to right direction
+hide circle
+skinparam linetype polyline
+skinparam ranksep 140
+skinparam nodesep 50
+skinparam classBackgroundColor #EDF5F4
+skinparam classBorderColor #335C67
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Noto Sans CJK SC
+skinparam defaultFontSize 13
+skinparam ArrowColor #335C67
+skinparam entityBackgroundColor #EDF5F4
+skinparam entityBorderColor #335C67
+skinparam noteBackgroundColor #FFF7E6
+skinparam noteBorderColor #D4B878
+skinparam sequenceParticipantBackgroundColor #EDF5F4
+skinparam sequenceParticipantBorderColor #335C67
+skinparam sequenceGroupBorderColor #9AB6BD
+
+entity "shop" as shop {
+  * id : BIGINT <<PK, AUTO_INCREMENT>>
+  --
+  currency : CHAR(3)
+}
+entity "category" as category {
+  * id : BIGINT <<PK, AUTO_INCREMENT>>
+  --
+  category_code : VARCHAR(80) <<UK>>
+  name : VARCHAR(120)
+}
+entity "menu_item" as item {
+  * id : BIGINT <<PK, AUTO_INCREMENT>>
+  --
+  item_code : VARCHAR(80) <<UK>>
+  category_id : BIGINT <<IDX, logical ref>>
+  name : VARCHAR(120)
+  price_minor : BIGINT
+  active : TINYINT
+}
+entity "item_inventory" as inventory {
+  * id : BIGINT <<PK, AUTO_INCREMENT>>
+  --
+  item_id : BIGINT <<UK, logical ref>>
+  stock_quantity : INT
+}
+entity "combo_offer" as offer {
+  * id : BIGINT <<PK, AUTO_INCREMENT>>
+  --
+  offer_code : VARCHAR(80) <<UK>>
+  first_item_id : BIGINT <<IDX, logical ref>>
+  second_item_id : BIGINT <<IDX, logical ref>>
+  name : VARCHAR(120)
+  bundle_price_minor : BIGINT
+  active : TINYINT
+}
+entity "customer_order" as orders {
+  * id : BIGINT <<PK, AUTO_INCREMENT>>
+  --
+  order_uuid : CHAR(36) <<UK>>
+  customer_name : VARCHAR(80)
+  status : TINYINT (1=PENDING_PAYMENT, 2=PAID)
+  currency : CHAR(3)
+  subtotal_minor : BIGINT
+  discount_minor : BIGINT
+  total_minor : BIGINT
+  paid_at : DATETIME(6), nullable
+  --
+  IDX (status, paid_at, id)
+}
+entity "order_line" as line {
+  * id : BIGINT <<PK, AUTO_INCREMENT>>
+  --
+  order_id : BIGINT <<logical ref>>
+  item_id : BIGINT <<IDX, logical ref>>
+  name : VARCHAR(120), snapshot
+  unit_price_minor : BIGINT, snapshot
+  quantity : INT
+  line_total_minor : BIGINT
+  --
+  UK (order_id, item_id)
+}
+entity "receipt" as receipt {
+  * id : BIGINT <<PK, AUTO_INCREMENT>>
+  --
+  order_id : BIGINT <<UK, logical ref>>
+  payload : MEDIUMTEXT, JSON snapshot
+}
+entity "inventory_change_log" as inventory_change_log {
+  * id : BIGINT <<PK, AUTO_INCREMENT>>
+  --
+  order_id : BIGINT <<logical ref>>
+  item_id : BIGINT <<IDX, logical ref>>
+  quantity : INT, positive sales deduction
+  --
+  UK (order_id, item_id)
+}
+entity "idempotency_record" as idem {
+  * id : BIGINT <<PK, AUTO_INCREMENT>>
+  --
+  scope : VARCHAR(100)
+  request_key : VARBINARY(128)
+  request_hash : CHAR(64)
+  http_status : INT, nullable
+  response_body : MEDIUMTEXT, nullable
+  --
+  UK (scope, request_key)
+}
+
+category ||..o{ item : category_id
+item ||..|| inventory : item_id
+item ||..o{ offer : first_item_id
+item ||..o{ offer : second_item_id
+orders ||..|{ line : order_id
+item ||..o{ line : item_id
+orders ||..o| receipt : order_id
+orders ||..o{ inventory_change_log : order_id
+item ||..o{ inventory_change_log : item_id
+
+note bottom of inventory
+  单库存池：一个 item_id 对应一条库存余额。
+  支付按内部 item_id 升序逐行 FOR UPDATE。
+  流水以同一 item_id 关联到该余额，
+  扣减与流水写入同事务提交。
+end note
+note bottom of orders
+  内部关联：Long id；对外：order_uuid。
+  订单号 C- 加 id，保留原接口排序语义。
+  入口通过 order_uuid 唯一索引锁定订单。
+end note
+note bottom of idem
+  请求身份是 (scope, request_key)，不是自增 id。
+  scope 中的 UUID 是接口操作范围，不是外键。
+  幂等记录与订单/支付业务共用同一事务。
+end note
+legend bottom
+  十张业务表均为 InnoDB；id 和关联 ID 使用 BIGINT UNSIGNED。
+  各表均有 create_time / update_time DATETIME(6)，此图省略重复时间字段。
+  虚线只表示业务关联，不建立 FOREIGN KEY；也没有 remark 列。
+  公开编码 category_code / item_code / offer_code 保持原参考值。
+  PK = 主键；UK = 唯一索引；IDX = 普通索引。
+  当前流水只记录支付扣减；退款、盘点、套餐新模型仍未实施。
+endlegend
+@enduml

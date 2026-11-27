@@ -1,24 +1,38 @@
-# Compiled class file
+# Java / Maven build output
+target/
+dist/
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
-*.nar
 *.ear
+*.nar
+
+# Logs, archives and crash reports
+*.log
 *.zip
 *.tar.gz
 *.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Local-only files and IDE configuration
+.local/
+.idea/
+*.iml
+.env
+.env.*
+!.env.example
+.DS_Store
+__MACOSX/
+*.ctxt
+.mtj.tmp/
+
+# Keep empty mount-point directories; never track database files or transient results.
+docker/data/**
+!docker/data/.gitkeep
+!docker/data/mysql/
+!docker/data/mysql/.gitkeep
+!docker/data/mysql-test/
+!docker/data/mysql-test/.gitkeep
+docker/results/**
+!docker/results/.gitkeep
